@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using LitmusStatus.Models;
 using System.Net;
 using System.IO;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace LitmusStatus.Controllers
 {
@@ -28,14 +30,52 @@ namespace LitmusStatus.Controllers
             return View();
         }
 
-        public ActionResult EmailClients()
+        public ActionResult Browsers()
         {
             return View();
         }
 
-        public ActionResult Browsers()
+        public ActionResult Foo()
         {
-            return View();
+            var model = new Client { ClientName = "bar" };
+            return View(model);
+        }
+
+        public List<Client> ParseXML(string xmlString)
+        {
+            //XmlDocument xml = new XmlDocument;
+            //xml.LoadXml(xmlString);
+            List<Client> clients = new List<Client>();
+
+            XDocument doc;
+            using (StringReader s = new StringReader(xmlString))
+            {
+                doc = XDocument.Load(s);
+            }
+
+            var applications = doc.Descendants("testing_application");
+
+            foreach (var application in applications)
+            {
+
+                clients.Add(new Client()
+                {
+                    TimeInS = application.Element("average_time_to_process").Value,
+                    AppCode = application.Element("application_code").Value,
+                    ClientName = application.Element("application_long_name").Value,
+                    CurrentStatus = application.Element("status").Value
+                });
+            }
+            
+            return clients;
+        }
+
+        public async Task<ActionResult> EmailClients()
+        {
+            string xml = await GetEmailTestStatus();
+            List<Client> clients = new List<Client>();
+            clients = ParseXML(xml);
+            return View(clients);
         }
 
         public async Task<string> GetEmailTestStatus()
@@ -46,17 +86,17 @@ namespace LitmusStatus.Controllers
             // Add an Accept header for JSON format.
             client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
+            
+            // Add Authorization header.
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Basic", "bWlrZS5kLmJ1cmtlQGdtYWlsLmNvbTpCYWRQYXNzd29yZA==");
 
-
-            // List data response.
-            HttpResponseMessage response = client.GetAsync(urlParameters).Result;  // Blocking call!
+            // Get response.
+            HttpResponseMessage response = client.GetAsync(urlParameters).Result;
             if (response.IsSuccessStatusCode)
             {
-                // Parse the response body. Blocking!
-                //var dataObjects = response.Content.ReadAsStringAsync<IEnumerable<DataObject>>().Result;
-                return await response.Content.ReadAsStringAsync();
+                String responseString = await response.Content.ReadAsStringAsync();
+                return responseString;
             }
             else
             {

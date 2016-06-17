@@ -9,7 +9,7 @@ namespace LitmusStatus.Models
     {
         public string ClientName { get; set; }
         public string AppCode { get; set; }
-        public int TimeInS { get; set; }
+        public string TimeInS { get; set; }
         public string CurrentStatus { get; set; }
     }
 }

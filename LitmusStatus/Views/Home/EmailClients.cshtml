@@ -1,5 +1,43 @@
-﻿@{ViewBag.Title = "Email Clients";}
+﻿@model IEnumerable<LitmusStatus.Models.Client>
 
-<p>Supported E-mail clients:</p>
+@{
+    ViewBag.Title = "EmailClients";
+}
 
-@Html.Action("GetEmailTestStatus", "Home")
+<h2>EmailClients</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ClientName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AppCode)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TimeInS)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CurrentStatus)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.ClientName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AppCode)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TimeInS)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CurrentStatus)
+        </td>
+    </tr>
+}
+
+</table>
